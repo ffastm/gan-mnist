@@ -16,24 +16,26 @@ class G(nn.Module):
     def __init__(self, noise_size=noise_size):
         super(G, self).__init__()
         self.fc1 = nn.Linear(noise_size, 100)
-        self.fc1 = nn.Linear(100, 512)
+        self.fc2 = nn.Linear(100, 512)
         self.fc3 = nn.Linear(512, 28*28)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
         return x
 
 class D(nn.Module):
     def __init__(self):
         super(D, self).__init__()
         self.fc1 = nn.Linear(28*28, 500)
-        self.fc1 = nn.Linear(500, 100)
+        self.fc2 = nn.Linear(500, 100)
         self.fc3 = nn.Linear(100, 2)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
         return x
 
 
