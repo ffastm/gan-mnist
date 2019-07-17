@@ -16,7 +16,8 @@ class G(nn.Module):
     def __init__(self, noise_size=noise_size):
         super(G, self).__init__()
         self.fc1 = nn.Linear(noise_size, 100)
-        self.fc2 = nn.Linear(100, 28*28)
+        self.fc1 = nn.Linear(100, 512)
+        self.fc3 = nn.Linear(512, 28*28)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -26,8 +27,9 @@ class G(nn.Module):
 class D(nn.Module):
     def __init__(self):
         super(D, self).__init__()
-        self.fc1 = nn.Linear(28*28, 100)
-        self.fc2 = nn.Linear(100, 2)
+        self.fc1 = nn.Linear(28*28, 500)
+        self.fc1 = nn.Linear(500, 100)
+        self.fc3 = nn.Linear(100, 2)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -55,7 +57,7 @@ if __name__ == "__main__":
     optimizer_d = optim.SGD(d.parameters(), lr=1e-2)
     optimizer_g = optim.SGD(g.parameters(), lr=1e-2)
 
-    for epoch in range(2):
+    for epoch in range(10):
         for batch_idx, (real_data, _) in enumerate(train_loader):
             optimizer_d.zero_grad()
             noise = torch.randn(batch_size//2, noise_size, requires_grad=True)
@@ -82,12 +84,14 @@ if __name__ == "__main__":
             loss_g.backward()
             optimizer_g.step()
 
-    noise = torch.randn(16, noise_size, requires_grad=True)
-    generated_data = g(noise) 
-    print("here")
-    for i, digit in enumerate(generated_data): 
-        plt.matshow(digit.view(28, 28).detach().numpy())
-        plt.savefig("digit%02d.jpg" % i)
+        noise = torch.randn(16, noise_size, requires_grad=True)
+        generated_data = g(noise) 
+        print("here")
+        for i, digit in enumerate(generated_data): 
+            digit = digit.view(28, 28).detach().numpy()
+            digit = (digit-np.min(digit))/(np.max(digit)-np.min(digit))*255
+            print(np.min(digit), np.max(digit))
+            np.save("digit%02_%02d" % (epoch, i), digit.astype(np.uint8))
 
 #    plt.plot(loss_list_d, color="b")
 #    plt.plot(loss_list_g, color="r")
